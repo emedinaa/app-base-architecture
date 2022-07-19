@@ -1,4 +1,4 @@
-package com.emedinaa.basearchitecture
+package com.emedinaa.basearchitecture.ui
 
 import android.os.Bundle
 import android.util.Log
@@ -8,17 +8,26 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.Dispatchers
+import com.emedinaa.basearchitecture.CourseEntity
+import com.emedinaa.basearchitecture.R
+import com.emedinaa.basearchitecture.data.CourseRepository
+import com.emedinaa.basearchitecture.data.remote.CourseRemoteDataSource
+import com.emedinaa.basearchitecture.data.remote.RemoteApi
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
 
 class MainFragment : Fragment() {
 
     private var recyclerView: RecyclerView? = null
-    private val remoteApi = RemoteApi()
+
+    //private val remoteApi = RemoteApi()
+    private val courseRepository: CourseRepository by lazy {
+        CourseRemoteDataSource(RemoteApi(), Json {
+            ignoreUnknownKeys = true
+            encodeDefaults = true
+        })
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -37,6 +46,30 @@ class MainFragment : Fragment() {
 
     private fun retrieveCourses() {
         lifecycleScope.launch {
+            val result = courseRepository.retrieveCourses()
+
+            if (result.isSuccess) {
+                render(result.getOrDefault(emptyList()))
+            } else {
+                showError(result.exceptionOrNull())
+            }
+        }
+    }
+    /*private fun retrieveCourses() {
+        lifecycleScope.launch {
+            val result = withContext(Dispatchers.IO) {
+                courseRepository.retrieveCourses()
+            }
+            if (result.isSuccess) {
+                render(result.getOrDefault(emptyList()))
+            } else {
+                showError(result.exceptionOrNull())
+            }
+        }
+    }*/
+
+    /*private fun retrieveCourses() {
+        lifecycleScope.launch {
             val result = withContext(Dispatchers.IO) {
                 processCall()
             }
@@ -46,7 +79,7 @@ class MainFragment : Fragment() {
                 showError(result.exceptionOrNull())
             }
         }
-    }
+    }*/
 
     private fun showError(throwable: Throwable?) {
         Log.v("CONSOLE", "throwable $throwable")
@@ -54,12 +87,10 @@ class MainFragment : Fragment() {
 
     private fun render(courses: List<CourseEntity>) {
         Log.v("CONSOLE", "render $courses")
-        (recyclerView?.adapter as? CourseAdapter)?.let {
-            it.update(courses)
-        }
+        (recyclerView?.adapter as? CourseAdapter)?.update(courses)
     }
 
-    private fun processCall(): Result<List<CourseEntity>> {
+    /*private fun processCall(): Result<List<CourseEntity>> {
         return try {
             val response = remoteApi.callService(remoteApi.buildGetRequest("/api/courses/"))
             if (response.isSuccessful) {
@@ -77,5 +108,7 @@ class MainFragment : Fragment() {
         } catch (exception: Exception) {
             Result.failure(exception)
         }
-    }
+    }*/
+
+
 }

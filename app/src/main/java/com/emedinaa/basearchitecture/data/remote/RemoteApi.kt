@@ -1,4 +1,4 @@
-package com.emedinaa.basearchitecture
+package com.emedinaa.basearchitecture.data.remote
 
 import okhttp3.OkHttpClient
 import okhttp3.Request
