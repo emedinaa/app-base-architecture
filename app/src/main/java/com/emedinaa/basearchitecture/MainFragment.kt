@@ -59,17 +59,21 @@ class MainFragment : Fragment() {
         }
     }
 
-    private  suspend fun processCall(): Result<List<CourseEntity>> {
+    private fun processCall(): Result<List<CourseEntity>> {
         return try {
-            val response = remoteApi.build().getCourses()
-            /*if (response.isSuccessful) {
-                //val coursesResponse = Json.decodeFromString<CoursesResponse>(response.toString())
-                Result.success(response.body()?.data ?: emptyList())
+            val response = remoteApi.callService(remoteApi.buildGetRequest("/api/courses/"))
+            if (response.isSuccessful) {
+                val body = response.body?.string() ?: ""
+                Log.v("CONSOLE", "body : $body")
+                val courseResponse =
+                    Json {
+                        ignoreUnknownKeys = true
+                        encodeDefaults = true
+                    }.decodeFromString<CoursesResponse>(body)
+                Result.success(courseResponse.data ?: emptyList())
             } else {
-                val errorBody = response.errorBody()?.string()
-                Result.failure(Exception(errorBody))
-            }*/
-            Result.success(emptyList())
+                Result.success(emptyList())
+            }
         } catch (exception: Exception) {
             Result.failure(exception)
         }
