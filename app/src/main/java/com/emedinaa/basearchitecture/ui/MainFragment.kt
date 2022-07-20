@@ -1,18 +1,25 @@
 package com.emedinaa.basearchitecture.ui
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.RecyclerView
 import com.emedinaa.basearchitecture.CourseEntity
 import com.emedinaa.basearchitecture.R
 import com.emedinaa.basearchitecture.data.CourseRepository
 import com.emedinaa.basearchitecture.data.remote.CourseRemoteDataSource
 import com.emedinaa.basearchitecture.data.remote.RemoteApi
+import com.emedinaa.basearchitecture.extensions.createFactory
+import com.emedinaa.basearchitecture.viewmodel.MainUIState
+import com.emedinaa.basearchitecture.viewmodel.MainViewModel
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 
@@ -29,6 +36,10 @@ class MainFragment : Fragment() {
         })
     }
 
+    private val viewModel by viewModels<MainViewModel> {
+        MainViewModel(courseRepository).createFactory()
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -41,45 +52,26 @@ class MainFragment : Fragment() {
         recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView?.adapter = CourseAdapter(emptyList())
 
-        retrieveCourses()
+        observerUiState()
     }
 
-    private fun retrieveCourses() {
+    @SuppressLint("UnsafeRepeatOnLifecycleDetector")
+    private fun observerUiState() {
         lifecycleScope.launch {
-            val result = courseRepository.retrieveCourses()
-
-            if (result.isSuccess) {
-                render(result.getOrDefault(emptyList()))
-            } else {
-                showError(result.exceptionOrNull())
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.uiState.collect { uiState ->
+                    when (uiState) {
+                        is MainUIState.Success -> {
+                            render(uiState.courses)
+                        }
+                        is MainUIState.Error -> {
+                            showError(uiState.exception)
+                        }
+                    }
+                }
             }
         }
     }
-    /*private fun retrieveCourses() {
-        lifecycleScope.launch {
-            val result = withContext(Dispatchers.IO) {
-                courseRepository.retrieveCourses()
-            }
-            if (result.isSuccess) {
-                render(result.getOrDefault(emptyList()))
-            } else {
-                showError(result.exceptionOrNull())
-            }
-        }
-    }*/
-
-    /*private fun retrieveCourses() {
-        lifecycleScope.launch {
-            val result = withContext(Dispatchers.IO) {
-                processCall()
-            }
-            if (result.isSuccess) {
-                render(result.getOrDefault(emptyList()))
-            } else {
-                showError(result.exceptionOrNull())
-            }
-        }
-    }*/
 
     private fun showError(throwable: Throwable?) {
         Log.v("CONSOLE", "throwable $throwable")
@@ -89,6 +81,19 @@ class MainFragment : Fragment() {
         Log.v("CONSOLE", "render $courses")
         (recyclerView?.adapter as? CourseAdapter)?.update(courses)
     }
+
+    /*private fun retrieveCourses() {
+    lifecycleScope.launch {
+        val result = withContext(Dispatchers.IO) {
+            processCall()
+        }
+        if (result.isSuccess) {
+            render(result.getOrDefault(emptyList()))
+        } else {
+            showError(result.exceptionOrNull())
+        }
+    }
+}*/
 
     /*private fun processCall(): Result<List<CourseEntity>> {
         return try {
