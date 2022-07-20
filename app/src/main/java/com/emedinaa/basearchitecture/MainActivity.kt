@@ -1,8 +1,7 @@
-package com.emedinaa.basearchitecture.ui
+package com.emedinaa.basearchitecture
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.emedinaa.basearchitecture.R
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

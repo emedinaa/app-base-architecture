@@ -1,12 +1,10 @@
-package com.emedinaa.basearchitecture.ui
+package com.emedinaa.basearchitecture
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.emedinaa.basearchitecture.CourseEntity
-import com.emedinaa.basearchitecture.R
 
 class CourseAdapter(var courses: List<CourseEntity>) :
     RecyclerView.Adapter<CourseAdapter.CourseViewHolder>() {
