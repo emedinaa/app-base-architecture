@@ -28,7 +28,6 @@ class MainFragment : Fragment() {
 
     private var recyclerView: RecyclerView? = null
 
-    //private val remoteApi = RemoteApi()
     private val courseRepository: CourseRepository by lazy {
         CourseRemoteDataSource(RemoteApi(), Json {
             ignoreUnknownKeys = true
@@ -81,39 +80,5 @@ class MainFragment : Fragment() {
         Log.v("CONSOLE", "render $courses")
         (recyclerView?.adapter as? CourseAdapter)?.update(courses)
     }
-
-    /*private fun retrieveCourses() {
-    lifecycleScope.launch {
-        val result = withContext(Dispatchers.IO) {
-            processCall()
-        }
-        if (result.isSuccess) {
-            render(result.getOrDefault(emptyList()))
-        } else {
-            showError(result.exceptionOrNull())
-        }
-    }
-}*/
-
-    /*private fun processCall(): Result<List<CourseEntity>> {
-        return try {
-            val response = remoteApi.callService(remoteApi.buildGetRequest("/api/courses/"))
-            if (response.isSuccessful) {
-                val body = response.body?.string() ?: ""
-                Log.v("CONSOLE", "body : $body")
-                val courseResponse =
-                    Json {
-                        ignoreUnknownKeys = true
-                        encodeDefaults = true
-                    }.decodeFromString<CoursesResponse>(body)
-                Result.success(courseResponse.data ?: emptyList())
-            } else {
-                Result.success(emptyList())
-            }
-        } catch (exception: Exception) {
-            Result.failure(exception)
-        }
-    }*/
-
 
 }

@@ -14,27 +14,28 @@ class CourseRemoteDataSource(
     private val json: Json
 ) : CourseRepository {
 
-    override suspend fun retrieveCourses(): Result<List<CourseEntity>> = withContext(Dispatchers.IO) {
-        try {
-            val response = remoteApi.callService(remoteApi.buildGetRequest("/api/courses/"))
-            if (response.isSuccessful) {
-                val body = response.body?.string() ?: ""
-                Log.v("CONSOLE", "body : $body")
-                val courseResponse =
-                    json.decodeFromString<CoursesResponse>(body)
-                val courses = courseResponse.data?.map {
-                    CourseEntity(
-                        it.id, it.nickname ?: "",
-                        it.name ?: "", it.startDate ?: "",
-                        it.image ?: "", it.desc ?: ""
-                    )
-                } ?: emptyList()
-                Result.success(courses)
-            } else {
-                Result.success(emptyList())
+    override suspend fun retrieveCourses(): Result<List<CourseEntity>> =
+        withContext(Dispatchers.IO) {
+            try {
+                val response = remoteApi.callService(remoteApi.buildGetRequest("/api/courses/"))
+                if (response.isSuccessful) {
+                    val body = response.body?.string() ?: ""
+                    Log.v("CONSOLE", "body : $body")
+                    val courseResponse =
+                        json.decodeFromString<CoursesResponse>(body)
+                    val courses = courseResponse.data?.map {
+                        CourseEntity(
+                            it.id, it.nickname ?: "",
+                            it.name ?: "", it.startDate ?: "",
+                            it.image ?: "", it.desc ?: ""
+                        )
+                    } ?: emptyList()
+                    Result.success(courses)
+                } else {
+                    Result.failure(Exception("Error ${response.code}  ${response.message}"))
+                }
+            } catch (exception: Exception) {
+                Result.failure(exception)
             }
-        } catch (exception: Exception) {
-            Result.failure(exception)
         }
-    }
 }
