@@ -3,7 +3,7 @@ package com.emedinaa.basearchitecture.data.remote
 import okhttp3.OkHttpClient
 import okhttp3.Request
 
-private const val URL = "https://obscure-earth-55790.herokuapp.com"
+private const val URL = "https://emedinaa.azurewebsites.net"
 
 class RemoteApi {
 
